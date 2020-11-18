@@ -4,31 +4,25 @@ import com.proximapp.gathering.entity.Gathering;
 import com.proximapp.gathering.entity.Place;
 import com.proximapp.gathering.entity.Tracking;
 import com.proximapp.gathering.repo.IGatheringRepo;
-import com.proximapp.gathering.util.StdDateTimeManager;
 
-import java.text.ParseException;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 public class PlainGatheringRepo implements IGatheringRepo {
 
-	private final StdDateTimeManager dateTimeManager = new StdDateTimeManager();
 	private final List<Gathering> gatherings = new LinkedList<>();
-	private final long gatheringDurationThresholdMillis = 1000 * 60 * 5;
+	private final long GATHERING_DURATION_THRESHOLD_MILLIS = 1000 * 60 * 5;
 
 	@Override
-	public boolean addGatheringInfo(Tracking t1, Tracking t2, Place place, double distance, String datetime) {
+	public boolean addGatheringInfo(Tracking t1, Tracking t2, Place place, double distance, Date date) {
 		Gathering gathering = null;
 		for (Gathering curGath : gatherings) {
-			if (curGath.getPlace().getId() == place.getId()) {
-				try {
-					long diffInMillies = dateTimeManager.getMillisFromDateTimes(curGath.getEndDatetime(), datetime);
-					if (diffInMillies <= gatheringDurationThresholdMillis) {
-						gathering = curGath;
-						break;
-					}
-				} catch (ParseException e) {
-					e.printStackTrace();
+			if (curGath.getPlaceId() == place.getId()) {
+				long diffInMillies = date.getTime() - curGath.getEndDate().getTime();
+				if (diffInMillies <= GATHERING_DURATION_THRESHOLD_MILLIS) {
+					gathering = curGath;
+					break;
 				}
 			}
 		}
@@ -40,12 +34,10 @@ public class PlainGatheringRepo implements IGatheringRepo {
 					maxUsedId = curGathering.getId();
 			gathering = new Gathering();
 			gathering.setId(maxUsedId + 1);
-			gathering.setPlace(place);
+			gathering.setPlaceId(place.getId());
 			gatherings.add(gathering);
 		}
-		if (datetime.isEmpty())
-			datetime = dateTimeManager.getCurrentDateTime();
-		gathering.register(t1, datetime);
+		gathering.register(t1, date);
 		gathering.register(t2);
 
 		return true;

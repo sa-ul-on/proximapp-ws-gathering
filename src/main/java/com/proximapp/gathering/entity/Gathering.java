@@ -1,14 +1,12 @@
 package com.proximapp.gathering.entity;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Gathering {
 
 	private long id;
-	private Place place;
-	private final Map<Long, String> trackings = new HashMap<>();
+	private long placeId;
+	private final Map<Long, Date> trackings = new HashMap<>();
 
 	public long getId() {
 		return id;
@@ -18,29 +16,29 @@ public class Gathering {
 		this.id = id;
 	}
 
-	public void setPlace(Place place) {
-		this.place = place;
+	public long getPlaceId() {
+		return placeId;
 	}
 
-	public Place getPlace() {
-		return place;
+	public void setPlaceId(long placeId) {
+		this.placeId = placeId;
 	}
 
-	public boolean register(Tracking tracking, String datetime) {
+	public boolean register(Tracking tracking, Date date) {
 		if (tracking == null)
 			return false;
-		if (datetime == null)
+		if (date == null)
 			return false;
 		if (trackings.containsKey(tracking.getId())) {
 			if (trackings.get(tracking.getId()) == null) {
-				trackings.put(tracking.getId(), datetime);
+				trackings.put(tracking.getId(), date);
 				return true;
 			} else {
 				// log: B <-> A ripetuto
 				return false;
 			}
 		} else {
-			trackings.put(tracking.getId(), datetime);
+			trackings.put(tracking.getId(), date);
 			return true;
 		}
 	}
@@ -54,63 +52,19 @@ public class Gathering {
 		return true;
 	}
 
-	public String getStartDatetime() {
-		if (trackings.isEmpty())
-			return null;
-		List<String> vals = new ArrayList<>(trackings.values());
-		int i = 0;
-		String min = null;
-		while (min == null && i < vals.size())
-			min = vals.get(i++);
-		SimpleDateFormat sdformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		for (; i < vals.size(); i++) {
-			if (vals.get(i) == null)
-				continue;
-			try {
-				Date a = sdformat.parse(min);
-				Date b = sdformat.parse(vals.get(i));
-				if (a.compareTo(b) > 0) {
-					min = vals.get(i);
-				}
-			} catch (ParseException e) {
-				// warning log
-				throw new IllegalStateException();
-			}
-		}
-		return min;
+	public Date getStartDate() {
+		return trackings.values().stream().filter(Objects::nonNull).min(Date::compareTo).orElse(null);
 	}
 
-	public String getEndDatetime() {
-		if (trackings.isEmpty())
-			return null;
-		List<String> vals = new ArrayList<>(trackings.values());
-		int i = 0;
-		String max = null;
-		while (max == null && i < vals.size())
-			max = vals.get(i++);
-		SimpleDateFormat sdformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		for (; i < vals.size(); i++) {
-			if (vals.get(i) == null)
-				continue;
-			try {
-				Date a = sdformat.parse(max);
-				Date b = sdformat.parse(vals.get(i));
-				if (a.compareTo(b) < 0) {
-					max = vals.get(i);
-				}
-			} catch (ParseException e) {
-				// warning log
-				throw new IllegalStateException();
-			}
-		}
-		return max;
+	public Date getEndDate() {
+		return trackings.values().stream().filter(Objects::nonNull).max(Date::compareTo).orElse(null);
 	}
 
 	public String toString() {
 		return "Id: " + id
-				+ "\nPlace: " + place.getId()
-				+ "\nFrom: " + getStartDatetime()
-				+ "\nTo: " + getEndDatetime()
+				+ "\nPlace: " + placeId
+				+ "\nFrom: " + getStartDate()
+				+ "\nTo: " + getEndDate()
 				+ "\nWith: " + trackings.keySet().toString();
 	}
 

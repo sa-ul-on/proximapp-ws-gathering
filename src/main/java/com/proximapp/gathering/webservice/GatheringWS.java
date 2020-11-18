@@ -13,10 +13,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @RestController
 public class GatheringWS {
+
+	private static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+	private static final SimpleDateFormat sdformat = new SimpleDateFormat(DATETIME_FORMAT);
+
 
 	private ITrackingRepo trackingRepo;
 	private IPlaceRepo placeRepo;
@@ -26,8 +33,22 @@ public class GatheringWS {
 	public boolean newGathering(@RequestParam(value = "t1id") long t1id, @RequestParam(value = "t2id") long t2id,
 	                            @RequestParam(value = "pid") long pid, @RequestParam(value = "dist") double dist,
 	                            @RequestParam(value = "datetime", defaultValue = "") String datetime) {
+
+		// Distance validation
 		if (dist < 0)
-			throw new IllegalStateException("shit happens...");
+			throw new IllegalStateException("Invalid distance");
+
+		// Date validation/retrieval
+		Date date;
+		if (datetime.isEmpty()) {
+			date = new Date(System.currentTimeMillis());
+		} else {
+			try {
+				date = sdformat.parse(datetime);
+			} catch (ParseException e) {
+				throw new IllegalStateException("Invalid datetime");
+			}
+		}
 
 		initRepos();
 
@@ -35,7 +56,7 @@ public class GatheringWS {
 		Tracking t2 = trackingRepo.findTrackingById(t2id);
 		Place place = placeRepo.findPlaceById(pid);
 
-		return gatheringRepo.addGatheringInfo(t1, t2, place, dist, datetime);
+		return gatheringRepo.addGatheringInfo(t1, t2, place, dist, date);
 	}
 
 	@GetMapping("/gatherings")
