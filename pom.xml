@@ -8,10 +8,10 @@
 		<version>2.4.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.proximapp</groupId>
-	<artifactId>gathering</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>gathering</name>
+	<groupId>com.proximapp.gathering</groupId>
+	<artifactId>ws-gathering</artifactId>
+	<version>0.0.2</version>
+	<name>ws-gathering</name>
 	<description>Gatherings manager</description>
 
 	<properties>
