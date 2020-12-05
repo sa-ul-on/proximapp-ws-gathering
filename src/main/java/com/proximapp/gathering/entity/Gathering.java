@@ -24,30 +24,17 @@ public class Gathering {
 		this.placeId = placeId;
 	}
 
-	public boolean register(Tracking tracking, Date date) {
-		if (tracking == null)
-			return false;
-		if (date == null)
-			return false;
-		if (trackings.containsKey(tracking.getId())) {
-			if (trackings.get(tracking.getId()) == null) {
-				trackings.put(tracking.getId(), date);
+	public boolean register(long trackingId, Date date) {
+		if (!trackings.containsKey(trackingId)) {
+			trackings.put(trackingId, date);
+		} else if (date != null) {
+			if (trackings.get(trackingId) == null) {
+				trackings.put(trackingId, date);
 				return true;
 			} else {
 				// log: B <-> A ripetuto
 				return false;
 			}
-		} else {
-			trackings.put(tracking.getId(), date);
-			return true;
-		}
-	}
-
-	public boolean register(Tracking tracking) {
-		if (tracking == null)
-			return false;
-		if (!trackings.containsKey(tracking.getId())) {
-			trackings.put(tracking.getId(), null);
 		}
 		return true;
 	}
@@ -70,6 +57,10 @@ public class Gathering {
 
 	public Set<Long> getTrackings() {
 		return trackings.keySet();
+	}
+
+	public Date getDateFromTrackingId(long trackingId) {
+		return trackings.get(trackingId);
 	}
 
 }
