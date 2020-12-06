@@ -17,4 +17,12 @@ public class DatetimeManager {
 		return sdformat.parse(text);
 	}
 
+	public static Date parseSafe(String text) {
+		try {
+			return DatetimeManager.parse(text);
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+
 }
