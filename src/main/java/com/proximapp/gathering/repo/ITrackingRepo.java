@@ -10,7 +10,7 @@ public interface ITrackingRepo {
 
 	Tracking findTrackingById(long trackingId);
 
-	List<Tracking> findAll();
+	List<Tracking> findTrackingsByCompany(long companyId);
 
 	boolean deleteTracking(long trackingId);
 

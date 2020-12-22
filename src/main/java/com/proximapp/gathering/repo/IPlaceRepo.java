@@ -10,7 +10,7 @@ public interface IPlaceRepo {
 
 	Place findPlaceById(long placeId);
 
-	List<Place> findAll();
+	List<Place> findPlacesByCompany(long companyId);
 
 	boolean deletePlace(long placeId);
 

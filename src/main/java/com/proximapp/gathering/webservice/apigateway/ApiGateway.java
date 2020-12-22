@@ -26,7 +26,8 @@ public class ApiGateway {
 	private ITrackingRepo trackingRepo;
 
 	@GetMapping("/api/find")
-	public List<Object> find(@RequestParam(value = "date_from", defaultValue = "") String strDateFrom,
+	public List<Object> find(@RequestParam(value = "company_id", defaultValue = "") long companyId,
+	                         @RequestParam(value = "date_from", defaultValue = "") String strDateFrom,
 	                         @RequestParam(value = "date_to", defaultValue = "") String strDateTo,
 	                         @RequestParam(value = "trackings", defaultValue = "") String strTrackingIds,
 	                         @RequestParam(value = "places", defaultValue = "") String strPlaceIds) {
@@ -72,7 +73,7 @@ public class ApiGateway {
 
 		final long dateFromTime = dateFrom != null ? dateFrom.getTime() : -1;
 		final long dateToTime = dateTo != null ? dateTo.getTime() : -1;
-		List<Gathering> survived = gatheringRepo.findAll().stream().filter(gg -> {
+		List<Gathering> survived = gatheringRepo.findGatheringsByCompany(companyId).stream().filter(gg -> {
 			if (!places.isEmpty() && !placeIds.contains(gg.getPlaceId()))
 				return false;
 			if (!trackings.isEmpty()) {
@@ -118,13 +119,15 @@ public class ApiGateway {
 	}
 
 	private void initRepos() {
+		//final boolean FILL_TEST_DATA = false;
 		if (gatheringRepo == null) {
 			DriverSetter driverSetter = new DriverSetter();
 			driverSetter.init();
 			gatheringRepo = driverSetter.getGatheringRepo();
 			placeRepo = driverSetter.getPlaceRepo();
 			trackingRepo = driverSetter.getTrackingRepo();
-			if (gatheringRepo.findAll().isEmpty()) {
+			/*
+			if (FILL_TEST_DATA) {
 				Tracking t1 = new Tracking();
 				t1.setNome("Persona 1");
 				trackingRepo.createTracking(t1);
@@ -168,6 +171,7 @@ public class ApiGateway {
 				g3.register(3, DatetimeManager.parseSafe("2020-12-11 10:00:08"));
 				gatheringRepo.createGathering(g3);
 			}
+			*/
 		}
 	}
 

@@ -5,21 +5,14 @@ import com.proximapp.gathering.repo.IGatheringRepo;
 import com.proximapp.gathering.repo.IPlaceRepo;
 import com.proximapp.gathering.repo.IRepoSystem;
 import com.proximapp.gathering.repo.ITrackingRepo;
-import com.proximapp.gathering.repo.impl.local.LocalRepoSystem;
 
 public class DriverSetter {
-
-	public static boolean testing = false;
 
 	private IRepoSystem repoSystem;
 
 	public void init() {
-		if (testing) {
-			repoSystem = new LocalRepoSystem();
-		} else {
-			repoSystem = new MongoDbRepoSystem();
-			((MongoDbRepoSystem) repoSystem).connect();
-		}
+		repoSystem = new MongoDbRepoSystem();
+		((MongoDbRepoSystem) repoSystem).connect();
 	}
 
 	public ITrackingRepo getTrackingRepo() {

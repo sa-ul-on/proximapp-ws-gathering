@@ -13,7 +13,7 @@ public interface IGatheringRepo {
 
 	Gathering findGatheringInPlaceBeforeThreshold(long placeId, Date date, long threshold);
 
-	List<Gathering> findAll();
+	List<Gathering> findGatheringsByCompany(long companyId);
 
 	Gathering updateGathering(Gathering gathering);
 

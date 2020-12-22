@@ -8,26 +8,42 @@ import java.util.List;
 @RestController
 public class PlaceController extends IWS {
 
-	@GetMapping("/places")
-	public List<Place> index() {
-		initRepos();
-		return placeRepo.findAll();
-	}
-
+	/** createPlace(name, companyId) */
 	@PostMapping("/places")
-	public Place create(@RequestParam(value = "name") String name) {
+	public Place create(@RequestParam(value = "name") String name,
+	                    @RequestParam(value = "company_id") long companyId) {
 		initRepos();
 		Place place = new Place();
 		place.setName(name);
+		place.setCompanyId(companyId);
 		return placeRepo.createPlace(place);
 	}
 
-	@DeleteMapping("/places/{id}")
-	public boolean destroy(@PathVariable("id") long placeId) {
+	/** findPlacesByCompany(companyId) */
+	@GetMapping("/places")
+	public List<Place> index(@RequestParam(value = "company_id") long companyId) {
+		initRepos();
+		return placeRepo.findPlacesByCompany(companyId);
+	}
+
+	/** findPlaceById(placeId, companyId) */
+	@PostMapping("/places/{companyId}/{placeId}")
+	public Place show(@PathVariable("placeId") long placeId, @PathVariable("companyId") long companyId) {
+		initRepos();
 		Place place = placeRepo.findPlaceById(placeId);
-		if (place == null)
+		if (place != null && place.getCompanyId() == companyId)
+			return place;
+		else
+			return null;
+	}
+
+	@DeleteMapping("/places/{companyId}/{placeId}")
+	public boolean destroy(@PathVariable("placeId") long placeId, @PathVariable("companyId") long companyId) {
+		Place place = placeRepo.findPlaceById(placeId);
+		if (place != null && place.getCompanyId() == companyId)
+			return placeRepo.deletePlace(placeId);
+		else
 			return false;
-		return placeRepo.deletePlace(place.getId());
 	}
 
 }

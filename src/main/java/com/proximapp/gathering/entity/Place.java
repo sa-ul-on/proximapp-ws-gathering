@@ -4,6 +4,7 @@ public class Place {
 
 	private long id;
 	private String name;
+	private long companyId;
 
 	public long getId() {
 		return id;
@@ -19,6 +20,14 @@ public class Place {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public long getCompanyId() {
+		return companyId;
+	}
+
+	public void setCompanyId(long companyId) {
+		this.companyId = companyId;
 	}
 
 }

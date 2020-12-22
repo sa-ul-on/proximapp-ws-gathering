@@ -15,12 +15,7 @@ public class GatheringController extends IWS {
 
 	private final long GATHERING_DURATION_THRESHOLD_MILLIS = 1000 * 60 * 5;
 
-	@GetMapping("/gatherings")
-	public List<Gathering> index() {
-		initRepos();
-		return gatheringRepo.findAll();
-	}
-
+	/** notifyGathering(companyId, t1id, t2id, pid, dist, datetime) */
 	@PostMapping("/gatherings")
 	public boolean create(@RequestParam(value = "t1id") long t1id, @RequestParam(value = "t2id") long t2id,
 	                      @RequestParam(value = "pid") long pid, @RequestParam(value = "dist") double dist,
@@ -45,8 +40,14 @@ public class GatheringController extends IWS {
 		initRepos();
 
 		Tracking t1 = trackingRepo.findTrackingById(t1id);
+		if (t1 == null)
+			return false;
 		Tracking t2 = trackingRepo.findTrackingById(t2id);
+		if (t2 == null || t1.getCompanyId() != t2.getCompanyId())
+			return false;
 		Place place = placeRepo.findPlaceById(pid);
+		if (place == null || place.getCompanyId() != t1.getCompanyId())
+			return false;
 
 		boolean result;
 		Gathering gathering = gatheringRepo.findGatheringInPlaceBeforeThreshold(place.getId(), date,
@@ -65,12 +66,28 @@ public class GatheringController extends IWS {
 		return result;
 	}
 
-	@DeleteMapping("/gatherings/{id}")
-	public boolean destroy(@PathVariable("id") long gatheringId) {
+	/** findGatheringsByCompany(companyId) */
+	@GetMapping("/gatherings/{companyId}")
+	public List<Gathering> index(@PathVariable("companyId") long companyId) {
+		initRepos();
+		return gatheringRepo.findGatheringsByCompany(companyId);
+	}
+
+	/* TODO: findGatheringsByQuery(companyId, dateFrom, dateTo, trackingIds, placeIds) */
+
+	/** deleteGathering(gatheringId, companyId) */
+	@DeleteMapping("/gatherings/{companyId}/{gatheringId}")
+	public boolean destroy(@PathVariable("gatheringId") long gatheringId, @PathVariable("companyId") long companyId) {
 		Gathering gathering = gatheringRepo.findGatheringById(gatheringId);
 		if (gathering == null)
 			return false;
-		return gatheringRepo.deleteGathering(gathering.getId());
+		Place place = placeRepo.findPlaceById(gathering.getPlaceId());
+		if (place == null) // FIXME: notify illegal state
+			return false;
+		if (place.getCompanyId() == companyId)
+			return gatheringRepo.deleteGathering(gatheringId);
+		else
+			return false;
 	}
 
 }

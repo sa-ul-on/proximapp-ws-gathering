@@ -17,7 +17,12 @@ public class MongoDbTrackingRepo implements ITrackingRepo {
 
 	@Override
 	public Tracking createTracking(Tracking tracking) {
-		long maxId = findAll().stream().map(Tracking::getId).max(Long::compareTo).orElse(0L);
+		long maxId = 0;
+		for (DBObject dbObject : trackingCollection.find()) {
+			long curId = (long) dbObject.get("_id");
+			if (curId > maxId)
+				maxId = curId;
+		}
 		maxId++;
 		tracking.setId(maxId);
 		BasicDBObject obj = new BasicDBObject()
@@ -26,7 +31,9 @@ public class MongoDbTrackingRepo implements ITrackingRepo {
 				.append("lastname", tracking.getCognome())
 				.append("address", tracking.getIndirizzo())
 				.append("health_insurance_card", tracking.getTesseraSanitaria())
-				.append("phone", tracking.getTelefono());
+				.append("phone", tracking.getTelefono())
+				.append("user_id", tracking.getUserId())
+				.append("company_id", tracking.getCompanyId());
 		trackingCollection.insert(obj);
 		return tracking;
 	}
@@ -45,14 +52,17 @@ public class MongoDbTrackingRepo implements ITrackingRepo {
 			tracking.setIndirizzo((String) placeObj.get("address"));
 			tracking.setTesseraSanitaria((String) placeObj.get("health_insurance_card"));
 			tracking.setTelefono((String) placeObj.get("phone"));
+			tracking.setUserId((long) placeObj.get("user_id"));
+			tracking.setCompanyId((long) placeObj.get("company_id"));
 		}
 		return tracking;
 	}
 
 	@Override
-	public List<Tracking> findAll() {
+	public List<Tracking> findTrackingsByCompany(long companyId) {
 		List<Tracking> trackings = new LinkedList<>();
-		DBCursor cursor = trackingCollection.find();
+		DBObject query = new BasicDBObject("company_id", companyId);
+		DBCursor cursor = trackingCollection.find(query);
 		for (DBObject dbObject : cursor) {
 			Tracking tracking = new Tracking();
 			tracking.setId((long) dbObject.get("_id"));
@@ -61,6 +71,8 @@ public class MongoDbTrackingRepo implements ITrackingRepo {
 			tracking.setIndirizzo((String) dbObject.get("address"));
 			tracking.setTesseraSanitaria((String) dbObject.get("health_insurance_card"));
 			tracking.setTelefono((String) dbObject.get("phone"));
+			tracking.setUserId((long) dbObject.get("user_id"));
+			tracking.setCompanyId((long) dbObject.get("company_id"));
 			trackings.add(tracking);
 		}
 		return trackings;

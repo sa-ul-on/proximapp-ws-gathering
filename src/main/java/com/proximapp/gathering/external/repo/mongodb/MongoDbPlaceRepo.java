@@ -17,12 +17,18 @@ public class MongoDbPlaceRepo implements IPlaceRepo {
 
 	@Override
 	public Place createPlace(Place place) {
-		long maxId = findAll().stream().map(Place::getId).max(Long::compareTo).orElse(0L);
+		long maxId = 0;
+		for (DBObject dbObject : placesCollection.find()) {
+			long curId = (long) dbObject.get("_id");
+			if (curId > maxId)
+				maxId = curId;
+		}
 		maxId++;
 		place.setId(maxId);
 		placesCollection.insert(new BasicDBObject()
 				.append("_id", place.getId())
-				.append("name", place.getName()));
+				.append("name", place.getName())
+				.append("company_id", place.getCompanyId()));
 		return place;
 	}
 
@@ -36,17 +42,21 @@ public class MongoDbPlaceRepo implements IPlaceRepo {
 			place = new Place();
 			place.setId((long) placeObj.get("_id"));
 			place.setName((String) placeObj.get("name"));
+			place.setCompanyId((long) placeObj.get("company_id"));
 		}
 		return place;
 	}
 
 	@Override
-	public List<Place> findAll() {
+	public List<Place> findPlacesByCompany(long companyId) {
 		List<Place> places = new LinkedList<>();
-		for (DBObject dbObject : placesCollection.find()) {
+		DBObject query = new BasicDBObject("company_id", companyId);
+		DBCursor cursor = placesCollection.find(query);
+		for (DBObject dbObject : cursor) {
 			Place place = new Place();
 			place.setId((long) dbObject.get("_id"));
 			place.setName((String) dbObject.get("name"));
+			place.setCompanyId((long) dbObject.get("company_id"));
 			places.add(place);
 		}
 		return places;

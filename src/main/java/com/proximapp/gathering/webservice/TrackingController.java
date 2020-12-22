@@ -8,18 +8,15 @@ import java.util.List;
 @RestController
 public class TrackingController extends IWS {
 
-	@GetMapping("/trackings")
-	public List<Tracking> index() {
-		initRepos();
-		return trackingRepo.findAll();
-	}
-
+	/** createTracking(firstname, lastname, address, hicard, phone, userId, companyId) */
 	@PostMapping("/trackings")
 	public Tracking create(@RequestParam(value = "firstname") String firstname,
 	                       @RequestParam(value = "lastname") String lastname,
 	                       @RequestParam(value = "address") String address,
 	                       @RequestParam(value = "health_insurance_card") String healthInsuranceCard,
-	                       @RequestParam(value = "phone") String phone) {
+	                       @RequestParam(value = "phone") String phone,
+	                       @RequestParam(value = "user_id") long userId,
+	                       @RequestParam(value = "company_id") long companyId) {
 		initRepos();
 		Tracking tracking = new Tracking();
 		tracking.setNome(firstname);
@@ -27,15 +24,38 @@ public class TrackingController extends IWS {
 		tracking.setIndirizzo(address);
 		tracking.setTesseraSanitaria(healthInsuranceCard);
 		tracking.setTelefono(phone);
+		tracking.setUserId(userId);
+		tracking.setCompanyId(companyId);
 		return trackingRepo.createTracking(tracking);
 	}
 
-	@DeleteMapping("/trackings/{id}")
-	public boolean destroy(@PathVariable("id") long trackingId) {
+	/** findTrackingsByCompany(companyId) */
+	@GetMapping("/trackings")
+	public List<Tracking> index(long companyId) {
+		initRepos();
+		return trackingRepo.findTrackingsByCompany(companyId);
+	}
+
+	/** findTrackingsById(trackingId, companyId) */
+	@GetMapping("/trackings/{companyId}/{trackingId}")
+	public Tracking show(@PathVariable("trackingId") long trackingId,
+	                     @PathVariable("companyId") long companyId) {
+		initRepos();
 		Tracking tracking = trackingRepo.findTrackingById(trackingId);
-		if (tracking == null)
+		if (tracking != null && tracking.getCompanyId() == companyId)
+			return tracking;
+		else
+			return null;
+	}
+
+	/** deleteTracking(trackingId, companyId) */
+	@DeleteMapping("/trackings/{companyId}/{trackingId}")
+	public boolean destroy(@PathVariable("trackingId") long trackingId, @PathVariable("companyId") long companyId) {
+		Tracking tracking = trackingRepo.findTrackingById(trackingId);
+		if (tracking != null && tracking.getCompanyId() == companyId)
+			return trackingRepo.deleteTracking(trackingId);
+		else
 			return false;
-		return trackingRepo.deleteTracking(trackingId);
 	}
 
 }

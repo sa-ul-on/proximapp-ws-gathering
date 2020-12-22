@@ -8,6 +8,8 @@ public class Tracking {
 	private String indirizzo;
 	private String tesseraSanitaria;
 	private String telefono;
+	private long userId;
+	private long companyId;
 
 	public long getId() {
 		return id;
@@ -55,6 +57,22 @@ public class Tracking {
 
 	public void setTelefono(String telefono) {
 		this.telefono = telefono;
+	}
+
+	public long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(long userId) {
+		this.userId = userId;
+	}
+
+	public long getCompanyId() {
+		return companyId;
+	}
+
+	public void setCompanyId(long companyId) {
+		this.companyId = companyId;
 	}
 
 }

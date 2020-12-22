@@ -12,15 +12,21 @@ import java.util.List;
 
 public class MongoDbGatheringRepo implements IGatheringRepo {
 
-	private final DBCollection gatheringCollection;
+	private final DBCollection gatheringCollection, placeCollection;
 
 	public MongoDbGatheringRepo(DB database) {
 		gatheringCollection = database.getCollection("gatherings");
+		placeCollection = database.getCollection("places");
 	}
 
 	@Override
 	public Gathering createGathering(Gathering gathering) {
-		long maxId = findAll().stream().map(Gathering::getId).max(Long::compare).orElse(0L);
+		long maxId = 0;
+		for (DBObject dbObject : gatheringCollection.find()) {
+			long curId = (long) dbObject.get("_id");
+			if (curId > maxId)
+				maxId = curId;
+		}
 		maxId++;
 		gathering.setId(maxId);
 		BasicDBList trackingDbList = new BasicDBList();
@@ -74,7 +80,10 @@ public class MongoDbGatheringRepo implements IGatheringRepo {
 
 	@Override
 	public Gathering findGatheringInPlaceBeforeThreshold(long placeId, Date date, long threshold) {
-		for (Gathering gathering : findAll()) {
+		DBCursor cursor = gatheringCollection.find(new BasicDBObject("place_id", placeId));
+		for (DBObject dbObject : cursor) {
+			long gatheringId = (long) dbObject.get("_id");
+			Gathering gathering = findGatheringById(gatheringId);
 			if (gathering.getPlaceId() == placeId) {
 				long diffInMillies = date.getTime() - gathering.getEndDate().getTime();
 				if (diffInMillies <= threshold) {
@@ -86,12 +95,27 @@ public class MongoDbGatheringRepo implements IGatheringRepo {
 	}
 
 	@Override
-	public List<Gathering> findAll() {
-		// TODO: order
+	public List<Gathering> findGatheringsByCompany(long companyId) {
 		List<Gathering> gatherings = new LinkedList<>();
+		List<Long> placeIds = new LinkedList<>();
+		for (DBObject dbObject : placeCollection.find(new BasicDBObject("company_id", companyId))) {
+			long placeId = (long) dbObject.get("_id");
+			placeIds.add(placeId);
+		}
+		/* TODO: Use aggregate
+		DBObject lookupFields = new BasicDBObject("from", "places");
+		lookupFields.put("localField", "place_id");
+		lookupFields.put("foreignField", "_id");
+		lookupFields.put("as", "place");
+		DBObject lookup = new BasicDBObject("$lookup", lookupFields);
+		Cursor cursor = gatheringCollection.aggregate(Collections.singletonList(lookup), null);
+		*/
 		for (DBObject dbObject : gatheringCollection.find()) {
-			Gathering gathering = findGatheringById((long) dbObject.get("_id"));
-			gatherings.add(gathering);
+			long placeId = (long) dbObject.get("place_id");
+			if (placeIds.contains(placeId)) {
+				Gathering gathering = findGatheringById((long) dbObject.get("_id"));
+				gatherings.add(gathering);
+			}
 		}
 		return gatherings;
 	}
