@@ -4,6 +4,7 @@ import com.proximapp.gathering.entity.Gathering;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public interface IGatheringRepo {
 
@@ -13,7 +14,8 @@ public interface IGatheringRepo {
 
 	Gathering findGatheringInPlaceBeforeThreshold(long placeId, Date date, long threshold);
 
-	List<Gathering> findGatheringsByCompany(long companyId);
+	List<Gathering> findGatheringsByQuery(long companyId, Date dateFrom, Date dateTo, Set<Long> trackingIds,
+	                                      Set<Long> placeIds);
 
 	Gathering updateGathering(Gathering gathering);
 

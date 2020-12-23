@@ -3,6 +3,7 @@ package com.proximapp.gathering.webservice;
 import com.proximapp.gathering.entity.Tracking;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @RestController
@@ -33,10 +34,11 @@ public class TrackingController extends IWS {
 	@GetMapping("/trackings")
 	public List<Tracking> index(long companyId) {
 		initRepos();
-		return trackingRepo.findTrackingsByCompany(companyId);
+		List<Tracking> trackings = trackingRepo.findTrackingsByCompany(companyId);
+		return trackings != null ? trackings : new LinkedList<>();
 	}
 
-	/** findTrackingsById(trackingId, companyId) */
+	/** findTrackingById(trackingId, companyId) */
 	@GetMapping("/trackings/{companyId}/{trackingId}")
 	public Tracking show(@PathVariable("trackingId") long trackingId,
 	                     @PathVariable("companyId") long companyId) {

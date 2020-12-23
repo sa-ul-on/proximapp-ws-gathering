@@ -6,9 +6,7 @@ import com.proximapp.gathering.repo.IGatheringRepo;
 import com.proximapp.gathering.util.DatetimeManager;
 
 import java.text.ParseException;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class MongoDbGatheringRepo implements IGatheringRepo {
 
@@ -95,27 +93,40 @@ public class MongoDbGatheringRepo implements IGatheringRepo {
 	}
 
 	@Override
-	public List<Gathering> findGatheringsByCompany(long companyId) {
+	public List<Gathering> findGatheringsByQuery(long companyId, Date dateFrom, Date dateTo, Set<Long> trackingIds,
+	                                             Set<Long> placeIds) {
 		List<Gathering> gatherings = new LinkedList<>();
-		List<Long> placeIds = new LinkedList<>();
-		for (DBObject dbObject : placeCollection.find(new BasicDBObject("company_id", companyId))) {
-			long placeId = (long) dbObject.get("_id");
-			placeIds.add(placeId);
-		}
-		/* TODO: Use aggregate
 		DBObject lookupFields = new BasicDBObject("from", "places");
 		lookupFields.put("localField", "place_id");
 		lookupFields.put("foreignField", "_id");
 		lookupFields.put("as", "place");
-		DBObject lookup = new BasicDBObject("$lookup", lookupFields);
-		Cursor cursor = gatheringCollection.aggregate(Collections.singletonList(lookup), null);
-		*/
-		for (DBObject dbObject : gatheringCollection.find()) {
-			long placeId = (long) dbObject.get("place_id");
-			if (placeIds.contains(placeId)) {
-				Gathering gathering = findGatheringById((long) dbObject.get("_id"));
-				gatherings.add(gathering);
+		Cursor cursor = gatheringCollection.aggregate(Collections.singletonList(new BasicDBObject("$lookup",
+				lookupFields)), AggregationOptions.builder().build());
+		if (placeIds != null && placeIds.isEmpty())
+			placeIds = null;
+		if (trackingIds != null && trackingIds.isEmpty())
+			trackingIds = null;
+		while (cursor.hasNext()) {
+			DBObject dbObject = cursor.next();
+			BasicDBList plList = (BasicDBList) dbObject.get("place");
+			DBObject plObject = (DBObject) plList.get(0);
+			long curCompanyId = (long) plObject.get("company_id");
+			if (curCompanyId != companyId)
+				continue;
+			Gathering gg = findGatheringById((long) dbObject.get("_id"));
+			if (placeIds != null && !placeIds.contains(gg.getPlaceId()))
+				continue;
+			if (trackingIds != null) {
+				Set<Long> localTrackingIds = new HashSet<>(gg.getTrackings());
+				localTrackingIds.retainAll(trackingIds);
+				if (localTrackingIds.isEmpty())
+					continue;
 			}
+			if (dateFrom != null && gg.getStartDate().getTime() < dateFrom.getTime())
+				continue;
+			if (dateTo != null && gg.getEndDate().getTime() > dateTo.getTime())
+				continue;
+			gatherings.add(gg);
 		}
 		return gatherings;
 	}

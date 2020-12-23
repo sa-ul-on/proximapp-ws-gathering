@@ -8,13 +8,15 @@ import com.proximapp.gathering.repo.IGatheringRepo;
 import com.proximapp.gathering.repo.IPlaceRepo;
 import com.proximapp.gathering.repo.ITrackingRepo;
 import com.proximapp.gathering.util.DatetimeManager;
+import com.proximapp.gathering.webservice.GatheringController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.ParseException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ApiGateway {
@@ -32,65 +34,10 @@ public class ApiGateway {
 	                         @RequestParam(value = "trackings", defaultValue = "") String strTrackingIds,
 	                         @RequestParam(value = "places", defaultValue = "") String strPlaceIds) {
 		initRepos();
-
-		if (!strTrackingIds.matches(ID_LIST_REG_EXP))
-			return null;
-		if (!strPlaceIds.matches(ID_LIST_REG_EXP))
-			return null;
-
-		List<Tracking> trackings = strTrackingIds.isEmpty() ? new LinkedList<>()
-				: Arrays.stream(strTrackingIds.split(
-				","))
-				.map(Long::parseLong)
-				.distinct()
-				.map(trackingRepo::findTrackingById)
-				.collect(Collectors.toList());
-		if (trackings.contains(null))
-			return null;
-		Set<Long> trackingIds = trackings.stream().map(Tracking::getId).collect(Collectors.toSet());
-
-		List<Place> places = strPlaceIds.isEmpty() ? new LinkedList<>()
-				: Arrays.stream(strPlaceIds.split(","))
-				.map(Long::parseLong)
-				.distinct()
-				.map(placeRepo::findPlaceById)
-				.collect(Collectors.toList());
-		if (places.contains(null))
-			return null;
-		Set<Long> placeIds = places.stream().map(Place::getId).collect(Collectors.toSet());
-
-		Date dateFrom = null;
-		Date dateTo = null;
-		try {
-			if (!strDateFrom.isEmpty())
-				dateFrom = DatetimeManager.parse(strDateFrom + " 00:00:00");
-			if (!strDateTo.isEmpty())
-				dateTo = DatetimeManager.parse(strDateTo + " 00:00:00");
-		} catch (ParseException e) {
-			e.printStackTrace();
-			return null;
-		}
-
-		final long dateFromTime = dateFrom != null ? dateFrom.getTime() : -1;
-		final long dateToTime = dateTo != null ? dateTo.getTime() : -1;
-		List<Gathering> survived = gatheringRepo.findGatheringsByCompany(companyId).stream().filter(gg -> {
-			if (!places.isEmpty() && !placeIds.contains(gg.getPlaceId()))
-				return false;
-			if (!trackings.isEmpty()) {
-				Set<Long> localTrackingIds = new HashSet<>(gg.getTrackings());
-				localTrackingIds.retainAll(trackingIds);
-				if (localTrackingIds.isEmpty())
-					return false;
-			}
-			if (dateFromTime > -1 && gg.getStartDate().getTime() < dateFromTime)
-				return false;
-			if (dateToTime > -1 && gg.getEndDate().getTime() > dateToTime)
-				return false;
-			return true;
-		}).collect(Collectors.toList());
-
 		List<Object> resultMap = new LinkedList<>();
-		for (Gathering gg : survived) {
+		List<Gathering> resultedGatherings = new GatheringController().find(companyId, strDateFrom, strDateTo,
+				strTrackingIds, strPlaceIds);
+		for (Gathering gg : resultedGatherings) {
 			Map<String, Object> ll = new LinkedHashMap<>();
 			ll.put("id", gg.getId());
 			ll.put("start", DatetimeManager.format(gg.getStartDate()));
@@ -119,36 +66,42 @@ public class ApiGateway {
 	}
 
 	private void initRepos() {
-		//final boolean FILL_TEST_DATA = false;
+		final boolean FILL_TEST_DATA = false;
 		if (gatheringRepo == null) {
 			DriverSetter driverSetter = new DriverSetter();
 			driverSetter.init();
 			gatheringRepo = driverSetter.getGatheringRepo();
 			placeRepo = driverSetter.getPlaceRepo();
 			trackingRepo = driverSetter.getTrackingRepo();
-			/*
 			if (FILL_TEST_DATA) {
 				Tracking t1 = new Tracking();
 				t1.setNome("Persona 1");
+				t1.setCompanyId(1);
 				trackingRepo.createTracking(t1);
 				Tracking t2 = new Tracking();
 				t2.setNome("Persona 2");
+				t2.setCompanyId(1);
 				trackingRepo.createTracking(t2);
 				Tracking t3 = new Tracking();
 				t3.setNome("Persona 3");
+				t3.setCompanyId(1);
 				trackingRepo.createTracking(t3);
 				Tracking t4 = new Tracking();
 				t4.setNome("Persona 4");
+				t4.setCompanyId(1);
 				trackingRepo.createTracking(t4);
 
 				Place p1 = new Place();
 				p1.setName("Stanza 1");
+				p1.setCompanyId(1);
 				placeRepo.createPlace(p1);
 				Place p2 = new Place();
 				p2.setName("Stanza 2");
+				p2.setCompanyId(1);
 				placeRepo.createPlace(p2);
 				Place p3 = new Place();
 				p3.setName("Stanza 3");
+				p3.setCompanyId(1);
 				placeRepo.createPlace(p3);
 
 				Gathering g1 = new Gathering();
@@ -171,7 +124,6 @@ public class ApiGateway {
 				g3.register(3, DatetimeManager.parseSafe("2020-12-11 10:00:08"));
 				gatheringRepo.createGathering(g3);
 			}
-			*/
 		}
 	}
 

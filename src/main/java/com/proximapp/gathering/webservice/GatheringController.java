@@ -7,8 +7,8 @@ import com.proximapp.gathering.util.DatetimeManager;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class GatheringController extends IWS {
@@ -70,10 +70,48 @@ public class GatheringController extends IWS {
 	@GetMapping("/gatherings/{companyId}")
 	public List<Gathering> index(@PathVariable("companyId") long companyId) {
 		initRepos();
-		return gatheringRepo.findGatheringsByCompany(companyId);
+		List<Gathering> gatherings = gatheringRepo.findGatheringsByQuery(companyId, null, null, null, null);
+		return gatherings != null ? gatherings : new LinkedList<>();
 	}
 
-	/* TODO: findGatheringsByQuery(companyId, dateFrom, dateTo, trackingIds, placeIds) */
+	/** findGatheringsByQuery(companyId, dateFrom, dateTo, trackingIds, placeIds) */
+	@GetMapping("/gatherings/{companyId}/query")
+	public List<Gathering> find(@PathVariable("companyId") long companyId,
+	                            @RequestParam(value = "date_from", defaultValue = "") String strDateFrom,
+	                            @RequestParam(value = "date_to", defaultValue = "") String strDateTo,
+	                            @RequestParam(value = "trackings", defaultValue = "") String strTrackingIds,
+	                            @RequestParam(value = "places", defaultValue = "") String strPlaceIds) {
+		initRepos();
+		final String ID_LIST_REG_EXP = "((\\d+,)*\\d+|)";
+		if (!strTrackingIds.matches(ID_LIST_REG_EXP))
+			return null;
+		if (!strPlaceIds.matches(ID_LIST_REG_EXP))
+			return null;
+		Set<Long> trackingIds = strTrackingIds.isEmpty() ? new HashSet<>() :
+				Arrays.stream(strTrackingIds.split(","))
+						.map(Long::parseLong)
+						.filter(possibleTrackingId -> trackingRepo.findTrackingById(possibleTrackingId) != null)
+						.collect(Collectors.toSet());
+		Set<Long> placeIds = strPlaceIds.isEmpty() ? new HashSet<>() :
+				Arrays.stream(strPlaceIds.split(","))
+						.map(Long::parseLong)
+						.filter(possiblePlaceId -> placeRepo.findPlaceById(possiblePlaceId) != null)
+						.collect(Collectors.toSet());
+		Date dateFrom = null;
+		Date dateTo = null;
+		try {
+			if (!strDateFrom.isEmpty())
+				dateFrom = DatetimeManager.parse(strDateFrom + " 00:00:00");
+			if (!strDateTo.isEmpty())
+				dateTo = DatetimeManager.parse(strDateTo + " 00:00:00");
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return null;
+		}
+		List<Gathering> gatherings = gatheringRepo.findGatheringsByQuery(companyId, dateFrom, dateTo, trackingIds,
+				placeIds);
+		return gatherings != null ? gatherings : new LinkedList<>();
+	}
 
 	/** deleteGathering(gatheringId, companyId) */
 	@DeleteMapping("/gatherings/{companyId}/{gatheringId}")
@@ -82,7 +120,7 @@ public class GatheringController extends IWS {
 		if (gathering == null)
 			return false;
 		Place place = placeRepo.findPlaceById(gathering.getPlaceId());
-		if (place == null) // FIXME: notify illegal state
+		if (place == null)
 			return false;
 		if (place.getCompanyId() == companyId)
 			return gatheringRepo.deleteGathering(gatheringId);

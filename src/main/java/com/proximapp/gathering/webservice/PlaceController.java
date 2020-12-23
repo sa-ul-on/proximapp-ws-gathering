@@ -3,6 +3,7 @@ package com.proximapp.gathering.webservice;
 import com.proximapp.gathering.entity.Place;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @RestController
@@ -23,7 +24,8 @@ public class PlaceController extends IWS {
 	@GetMapping("/places")
 	public List<Place> index(@RequestParam(value = "company_id") long companyId) {
 		initRepos();
-		return placeRepo.findPlacesByCompany(companyId);
+		List<Place> places = placeRepo.findPlacesByCompany(companyId);
+		return places != null ? places : new LinkedList<>();
 	}
 
 	/** findPlaceById(placeId, companyId) */
@@ -37,6 +39,7 @@ public class PlaceController extends IWS {
 			return null;
 	}
 
+	/** deletePlace(placeId, companyId) */
 	@DeleteMapping("/places/{companyId}/{placeId}")
 	public boolean destroy(@PathVariable("placeId") long placeId, @PathVariable("companyId") long companyId) {
 		Place place = placeRepo.findPlaceById(placeId);
