@@ -23,46 +23,46 @@ class GatheringApplicationTests {
 		trackingController.create("6", "", "", "", "", 6, companyId);
 		trackingController.create("7", "", "", "", "", 7, companyId);
 		assert trackingController.index(companyId).stream().filter(tracking -> {
-			if (tracking.getId() == 1 && tracking.getNome().equals("Umberto")
-					&& tracking.getCognome().equals("Loria")
-					&& tracking.getIndirizzo().equals("Via Guglielmo Marconi 51")
-					&& tracking.getTesseraSanitaria().equals("xxxxx")
-					&& tracking.getTelefono().equals("+393343480234") && tracking.getUserId() == 1
+			if (tracking.getId() == 1 && tracking.getFirstname().equals("Umberto")
+					&& tracking.getLastname().equals("Loria")
+					&& tracking.getAddress().equals("Via Guglielmo Marconi 51")
+					&& tracking.getHicard().equals("xxxxx")
+					&& tracking.getPhone().equals("+393343480234") && tracking.getUserId() == 1
 					&& tracking.getCompanyId() == companyId)
 				return true;
-			else if (tracking.getId() == 2 && tracking.getNome().equals("Orlando")
-					&& tracking.getCognome().equals("Napoli") && tracking.getIndirizzo().equals("Via .....")
-					&& tracking.getTesseraSanitaria().equals("yyyyy") && tracking.getTelefono().equals(".....")
+			else if (tracking.getId() == 2 && tracking.getFirstname().equals("Orlando")
+					&& tracking.getLastname().equals("Napoli") && tracking.getAddress().equals("Via .....")
+					&& tracking.getHicard().equals("yyyyy") && tracking.getPhone().equals(".....")
 					&& tracking.getUserId() == 2 && tracking.getCompanyId() == companyId)
 				return true;
-			else if (tracking.getId() == 3 && tracking.getNome().equals("3")
-					&& tracking.getCognome().equals(tracking.getIndirizzo())
-					&& tracking.getIndirizzo().equals(tracking.getTesseraSanitaria())
-					&& tracking.getTesseraSanitaria().equals(tracking.getTelefono()) && tracking.getUserId() == 3
+			else if (tracking.getId() == 3 && tracking.getFirstname().equals("3")
+					&& tracking.getLastname().equals(tracking.getAddress())
+					&& tracking.getAddress().equals(tracking.getHicard())
+					&& tracking.getHicard().equals(tracking.getPhone()) && tracking.getUserId() == 3
 					&& tracking.getCompanyId() == companyId)
 				return true;
-			else if (tracking.getId() == 4 && tracking.getNome().equals("4")
-					&& tracking.getCognome().equals(tracking.getIndirizzo())
-					&& tracking.getIndirizzo().equals(tracking.getTesseraSanitaria())
-					&& tracking.getTesseraSanitaria().equals(tracking.getTelefono()) && tracking.getUserId() == 4
+			else if (tracking.getId() == 4 && tracking.getFirstname().equals("4")
+					&& tracking.getLastname().equals(tracking.getAddress())
+					&& tracking.getAddress().equals(tracking.getHicard())
+					&& tracking.getHicard().equals(tracking.getPhone()) && tracking.getUserId() == 4
 					&& tracking.getCompanyId() == companyId)
 				return true;
-			else if (tracking.getId() == 5 && tracking.getNome().equals("5")
-					&& tracking.getCognome().equals(tracking.getIndirizzo())
-					&& tracking.getIndirizzo().equals(tracking.getTesseraSanitaria())
-					&& tracking.getTesseraSanitaria().equals(tracking.getTelefono()) && tracking.getUserId() == 5
+			else if (tracking.getId() == 5 && tracking.getFirstname().equals("5")
+					&& tracking.getLastname().equals(tracking.getAddress())
+					&& tracking.getAddress().equals(tracking.getHicard())
+					&& tracking.getHicard().equals(tracking.getPhone()) && tracking.getUserId() == 5
 					&& tracking.getCompanyId() == companyId)
 				return true;
-			else if (tracking.getId() == 6 && tracking.getNome().equals("6")
-					&& tracking.getCognome().equals(tracking.getIndirizzo())
-					&& tracking.getIndirizzo().equals(tracking.getTesseraSanitaria())
-					&& tracking.getTesseraSanitaria().equals(tracking.getTelefono()) && tracking.getUserId() == 6
+			else if (tracking.getId() == 6 && tracking.getFirstname().equals("6")
+					&& tracking.getLastname().equals(tracking.getAddress())
+					&& tracking.getAddress().equals(tracking.getHicard())
+					&& tracking.getHicard().equals(tracking.getPhone()) && tracking.getUserId() == 6
 					&& tracking.getCompanyId() == companyId)
 				return true;
-			else if (tracking.getId() == 7 && tracking.getNome().equals("7")
-					&& tracking.getCognome().equals(tracking.getIndirizzo())
-					&& tracking.getIndirizzo().equals(tracking.getTesseraSanitaria())
-					&& tracking.getTesseraSanitaria().equals(tracking.getTelefono()) && tracking.getUserId() == 7
+			else if (tracking.getId() == 7 && tracking.getFirstname().equals("7")
+					&& tracking.getLastname().equals(tracking.getAddress())
+					&& tracking.getAddress().equals(tracking.getHicard())
+					&& tracking.getHicard().equals(tracking.getPhone()) && tracking.getUserId() == 7
 					&& tracking.getCompanyId() == companyId)
 				return true;
 			else
@@ -86,9 +86,9 @@ class GatheringApplicationTests {
 
 
 		GatheringController gatheringController = new GatheringController();
-		assert gatheringController.create(1, 2, 1, 0, "2020-11-15 11:34:00");
-		assert gatheringController.create(2, 1, 1, 0, "2020-11-15 11:35:00");
-		assert gatheringController.index(companyId).stream().filter(gathering -> {
+		assert gatheringController.create(companyId, 1, 2, 1, 0, "2020-11-15 11:34:00") != null;
+		assert gatheringController.create(companyId, 2, 1, 1, 0, "2020-11-15 11:35:00") != null;
+		assert gatheringController.find(companyId, "", "", "", "").stream().filter(gathering -> {
 			if (gathering.getPlaceId() == 1
 					&& placeController.show(gathering.getPlaceId(), companyId).getCompanyId() == companyId
 					&& DatetimeManager.format(gathering.getStartDate()).equals("2020-11-15 11:34:00")
@@ -100,9 +100,9 @@ class GatheringApplicationTests {
 				return false;
 			}
 		}).count() == 1;
-		assert gatheringController.create(4, 1, 2, 0, "2020-11-15 12:07:00");
-		assert gatheringController.create(1, 4, 2, 0, "2020-11-15 12:07:00");
-		assert gatheringController.index(companyId).stream().filter(gathering -> {
+		assert gatheringController.create(companyId, 4, 1, 2, 0, "2020-11-15 12:07:00") != null;
+		assert gatheringController.create(companyId, 1, 4, 2, 0, "2020-11-15 12:07:00") != null;
+		assert gatheringController.find(companyId, "", "", "", "").stream().filter(gathering -> {
 			if (gathering.getPlaceId() == 1
 					&& placeController.show(gathering.getPlaceId(), companyId).getCompanyId() == companyId
 					&& DatetimeManager.format(gathering.getStartDate()).equals("2020-11-15 11:34:00")
@@ -121,9 +121,9 @@ class GatheringApplicationTests {
 				return false;
 			}
 		}).count() == 2;
-		assert gatheringController.create(6, 7, 3, 0, "2020-11-15 12:32:00");
-		assert gatheringController.create(7, 6, 3, 0, "2020-11-15 12:32:00");
-		assert gatheringController.index(companyId).stream().filter(gathering -> {
+		assert gatheringController.create(companyId, 6, 7, 3, 0, "2020-11-15 12:32:00") != null;
+		assert gatheringController.create(companyId, 7, 6, 3, 0, "2020-11-15 12:32:00") != null;
+		assert gatheringController.find(companyId, "", "", "", "").stream().filter(gathering -> {
 			if (gathering.getPlaceId() == 1
 					&& placeController.show(gathering.getPlaceId(), companyId).getCompanyId() == companyId
 					&& DatetimeManager.format(gathering.getStartDate()).equals("2020-11-15 11:34:00")
@@ -149,9 +149,9 @@ class GatheringApplicationTests {
 				return false;
 			}
 		}).count() == 3;
-		assert gatheringController.create(3, 2, 1, 0, "2020-11-15 12:32:00");
-		assert gatheringController.create(2, 3, 1, 0, "2020-11-15 12:33:00");
-		assert gatheringController.index(companyId).stream().filter(gathering -> {
+		assert gatheringController.create(companyId, 3, 2, 1, 0, "2020-11-15 12:32:00") != null;
+		assert gatheringController.create(companyId, 2, 3, 1, 0, "2020-11-15 12:33:00") != null;
+		assert gatheringController.find(companyId, "", "", "", "").stream().filter(gathering -> {
 			if (gathering.getPlaceId() == 1
 					&& placeController.show(gathering.getPlaceId(), companyId).getCompanyId() == companyId
 					&& DatetimeManager.format(gathering.getStartDate()).equals("2020-11-15 11:34:00")
@@ -184,11 +184,11 @@ class GatheringApplicationTests {
 				return false;
 			}
 		}).count() == 4;
-		assert gatheringController.create(5, 6, 3, 0, "2020-11-15 12:34:00");
-		assert gatheringController.create(5, 7, 3, 0, "2020-11-15 12:34:00");
-		assert gatheringController.create(7, 5, 3, 0, "2020-11-15 12:34:00");
-		assert gatheringController.create(6, 5, 3, 0, "2020-11-15 12:34:00");
-		assert gatheringController.index(companyId).stream().filter(gathering -> {
+		assert gatheringController.create(companyId, 5, 6, 3, 0, "2020-11-15 12:34:00") != null;
+		assert gatheringController.create(companyId, 5, 7, 3, 0, "2020-11-15 12:34:00") != null;
+		assert gatheringController.create(companyId, 7, 5, 3, 0, "2020-11-15 12:34:00") != null;
+		assert gatheringController.create(companyId, 6, 5, 3, 0, "2020-11-15 12:34:00") != null;
+		assert gatheringController.find(companyId, "", "", "", "").stream().filter(gathering -> {
 			if (gathering.getPlaceId() == 1
 					&& placeController.show(gathering.getPlaceId(), companyId).getCompanyId() == companyId
 					&& DatetimeManager.format(gathering.getStartDate()).equals("2020-11-15 11:34:00")
@@ -222,13 +222,13 @@ class GatheringApplicationTests {
 				return false;
 			}
 		}).count() == 4;
-		assert gatheringController.create(3, 6, 3, 0, "2020-11-15 12:45:00");
-		assert gatheringController.create(6, 3, 3, 0, "2020-11-15 12:45:00");
-		assert gatheringController.create(7, 3, 3, 0, "2020-11-15 12:45:00");
-		assert gatheringController.create(6, 7, 3, 0, "2020-11-15 12:45:00");
-		assert gatheringController.create(7, 6, 3, 0, "2020-11-15 12:46:00");
-		assert gatheringController.create(3, 7, 3, 0, "2020-11-15 12:46:00");
-		assert gatheringController.index(companyId).stream().filter(gathering -> {
+		assert gatheringController.create(companyId, 3, 6, 3, 0, "2020-11-15 12:45:00") != null;
+		assert gatheringController.create(companyId, 6, 3, 3, 0, "2020-11-15 12:45:00") != null;
+		assert gatheringController.create(companyId, 7, 3, 3, 0, "2020-11-15 12:45:00") != null;
+		assert gatheringController.create(companyId, 6, 7, 3, 0, "2020-11-15 12:45:00") != null;
+		assert gatheringController.create(companyId, 7, 6, 3, 0, "2020-11-15 12:46:00") != null;
+		assert gatheringController.create(companyId, 3, 7, 3, 0, "2020-11-15 12:46:00") != null;
+		assert gatheringController.find(companyId, "", "", "", "").stream().filter(gathering -> {
 			if (gathering.getPlaceId() == 1
 					&& placeController.show(gathering.getPlaceId(), companyId).getCompanyId() == companyId
 					&& DatetimeManager.format(gathering.getStartDate()).equals("2020-11-15 11:34:00")

@@ -52,11 +52,11 @@ public class ApiGateway {
 				Tracking tracking = trackingRepo.findTrackingById(trackingId);
 				Map<String, Object> trackingMap = new LinkedHashMap<>();
 				trackingMap.put("id", tracking.getId());
-				trackingMap.put("nome", tracking.getNome());
-				trackingMap.put("cognome", tracking.getCognome());
-				trackingMap.put("indirizzo", tracking.getIndirizzo());
-				trackingMap.put("tessera_sanitaria", tracking.getTesseraSanitaria());
-				trackingMap.put("telefono", tracking.getTelefono());
+				trackingMap.put("nome", tracking.getFirstname());
+				trackingMap.put("cognome", tracking.getLastname());
+				trackingMap.put("indirizzo", tracking.getAddress());
+				trackingMap.put("tessera_sanitaria", tracking.getHicard());
+				trackingMap.put("telefono", tracking.getPhone());
 				trackingsList.add(trackingMap);
 			}
 			ll.put("trackings", trackingsList);
@@ -75,19 +75,19 @@ public class ApiGateway {
 			trackingRepo = driverSetter.getTrackingRepo();
 			if (FILL_TEST_DATA) {
 				Tracking t1 = new Tracking();
-				t1.setNome("Persona 1");
+				t1.setFirstname("Persona 1");
 				t1.setCompanyId(1);
 				trackingRepo.createTracking(t1);
 				Tracking t2 = new Tracking();
-				t2.setNome("Persona 2");
+				t2.setFirstname("Persona 2");
 				t2.setCompanyId(1);
 				trackingRepo.createTracking(t2);
 				Tracking t3 = new Tracking();
-				t3.setNome("Persona 3");
+				t3.setFirstname("Persona 3");
 				t3.setCompanyId(1);
 				trackingRepo.createTracking(t3);
 				Tracking t4 = new Tracking();
-				t4.setNome("Persona 4");
+				t4.setFirstname("Persona 4");
 				t4.setCompanyId(1);
 				trackingRepo.createTracking(t4);
 

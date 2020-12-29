@@ -3,11 +3,11 @@ package com.proximapp.gathering.entity;
 public class Tracking {
 
 	private long id;
-	private String nome;
-	private String cognome;
-	private String indirizzo;
-	private String tesseraSanitaria;
-	private String telefono;
+	private String firstname;
+	private String lastname;
+	private String address;
+	private String hicard;
+	private String phone;
 	private long userId;
 	private long companyId;
 
@@ -19,44 +19,44 @@ public class Tracking {
 		this.id = id;
 	}
 
-	public String getNome() {
-		return nome;
+	public String getFirstname() {
+		return firstname;
 	}
 
-	public void setNome(String nome) {
-		this.nome = nome;
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
 	}
 
-	public String getCognome() {
-		return cognome;
+	public String getLastname() {
+		return lastname;
 	}
 
-	public void setCognome(String cognome) {
-		this.cognome = cognome;
+	public void setLastname(String lastname) {
+		this.lastname = lastname;
 	}
 
-	public String getIndirizzo() {
-		return indirizzo;
+	public String getAddress() {
+		return address;
 	}
 
-	public void setIndirizzo(String indirizzo) {
-		this.indirizzo = indirizzo;
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
-	public String getTesseraSanitaria() {
-		return tesseraSanitaria;
+	public String getHicard() {
+		return hicard;
 	}
 
-	public void setTesseraSanitaria(String tesseraSanitaria) {
-		this.tesseraSanitaria = tesseraSanitaria;
+	public void setHicard(String hicard) {
+		this.hicard = hicard;
 	}
 
-	public String getTelefono() {
-		return telefono;
+	public String getPhone() {
+		return phone;
 	}
 
-	public void setTelefono(String telefono) {
-		this.telefono = telefono;
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 
 	public long getUserId() {

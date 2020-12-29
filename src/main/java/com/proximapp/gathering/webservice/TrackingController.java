@@ -10,29 +10,29 @@ import java.util.List;
 public class TrackingController extends IWS {
 
 	/** createTracking(firstname, lastname, address, hicard, phone, userId, companyId) */
-	@PostMapping("/trackings")
+	@PostMapping("/trackings/{companyId}")
 	public Tracking create(@RequestParam(value = "firstname") String firstname,
 	                       @RequestParam(value = "lastname") String lastname,
 	                       @RequestParam(value = "address") String address,
-	                       @RequestParam(value = "health_insurance_card") String healthInsuranceCard,
+	                       @RequestParam(value = "hicard") String hicard,
 	                       @RequestParam(value = "phone") String phone,
 	                       @RequestParam(value = "user_id") long userId,
-	                       @RequestParam(value = "company_id") long companyId) {
+	                       @PathVariable("companyId") long companyId) {
 		initRepos();
 		Tracking tracking = new Tracking();
-		tracking.setNome(firstname);
-		tracking.setCognome(lastname);
-		tracking.setIndirizzo(address);
-		tracking.setTesseraSanitaria(healthInsuranceCard);
-		tracking.setTelefono(phone);
+		tracking.setFirstname(firstname);
+		tracking.setLastname(lastname);
+		tracking.setAddress(address);
+		tracking.setHicard(hicard);
+		tracking.setPhone(phone);
 		tracking.setUserId(userId);
 		tracking.setCompanyId(companyId);
 		return trackingRepo.createTracking(tracking);
 	}
 
 	/** findTrackingsByCompany(companyId) */
-	@GetMapping("/trackings")
-	public List<Tracking> index(long companyId) {
+	@GetMapping("/trackings/{companyId}")
+	public List<Tracking> index(@PathVariable("companyId") long companyId) {
 		initRepos();
 		List<Tracking> trackings = trackingRepo.findTrackingsByCompany(companyId);
 		return trackings != null ? trackings : new LinkedList<>();

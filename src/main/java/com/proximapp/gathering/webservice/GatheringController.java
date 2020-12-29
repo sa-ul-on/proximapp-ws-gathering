@@ -16,14 +16,18 @@ public class GatheringController extends IWS {
 	private final long GATHERING_DURATION_THRESHOLD_MILLIS = 1000 * 60 * 5;
 
 	/** notifyGathering(companyId, t1id, t2id, pid, dist, datetime) */
-	@PostMapping("/gatherings")
-	public boolean create(@RequestParam(value = "t1id") long t1id, @RequestParam(value = "t2id") long t2id,
-	                      @RequestParam(value = "pid") long pid, @RequestParam(value = "dist") double dist,
-	                      @RequestParam(value = "datetime", defaultValue = "") String datetime) {
+	@PostMapping("/gatherings/{companyId}")
+	public Gathering create(@PathVariable("companyId") long companyId, @RequestParam(value = "t1id") long t1id,
+	                        @RequestParam(value = "t2id") long t2id, @RequestParam(value = "pid") long pid,
+	                        @RequestParam(value = "dist") double dist,
+	                        @RequestParam(value = "datetime", defaultValue = "") String datetime) {
 
 		// Distance validation
 		if (dist < 0)
 			throw new IllegalStateException("Invalid distance");
+		// Tracking IDs validation
+		if (t1id == t2id)
+			throw new IllegalStateException("Tracking IDs must be different");
 
 		// Date validation/retrieval
 		Date date;
@@ -40,16 +44,15 @@ public class GatheringController extends IWS {
 		initRepos();
 
 		Tracking t1 = trackingRepo.findTrackingById(t1id);
-		if (t1 == null)
-			return false;
+		if (t1 == null || t1.getCompanyId() != companyId)
+			return null;
 		Tracking t2 = trackingRepo.findTrackingById(t2id);
-		if (t2 == null || t1.getCompanyId() != t2.getCompanyId())
-			return false;
+		if (t2 == null || t2.getCompanyId() != companyId)
+			return null;
 		Place place = placeRepo.findPlaceById(pid);
-		if (place == null || place.getCompanyId() != t1.getCompanyId())
-			return false;
+		if (place == null || place.getCompanyId() != companyId)
+			return null;
 
-		boolean result;
 		Gathering gathering = gatheringRepo.findGatheringInPlaceBeforeThreshold(place.getId(), date,
 				GATHERING_DURATION_THRESHOLD_MILLIS);
 		if (gathering == null) {
@@ -57,21 +60,13 @@ public class GatheringController extends IWS {
 			gathering.setPlaceId(place.getId());
 			gathering.register(t1.getId(), date);
 			gathering.register(t2.getId(), null);
-			result = gatheringRepo.createGathering(gathering) != null;
+			gathering = gatheringRepo.createGathering(gathering);
 		} else {
 			gathering.register(t1.getId(), date);
 			gathering.register(t2.getId(), null);
-			result = gatheringRepo.updateGathering(gathering) != null;
+			gathering = gatheringRepo.updateGathering(gathering);
 		}
-		return result;
-	}
-
-	/** findGatheringsByCompany(companyId) */
-	@GetMapping("/gatherings/{companyId}")
-	public List<Gathering> index(@PathVariable("companyId") long companyId) {
-		initRepos();
-		List<Gathering> gatherings = gatheringRepo.findGatheringsByQuery(companyId, null, null, null, null);
-		return gatherings != null ? gatherings : new LinkedList<>();
+		return gathering;
 	}
 
 	/** findGatheringsByQuery(companyId, dateFrom, dateTo, trackingIds, placeIds) */
@@ -120,12 +115,9 @@ public class GatheringController extends IWS {
 		if (gathering == null)
 			return false;
 		Place place = placeRepo.findPlaceById(gathering.getPlaceId());
-		if (place == null)
+		if (place == null || place.getCompanyId() != companyId)
 			return false;
-		if (place.getCompanyId() == companyId)
-			return gatheringRepo.deleteGathering(gatheringId);
-		else
-			return false;
+		return gatheringRepo.deleteGathering(gatheringId);
 	}
 
 }

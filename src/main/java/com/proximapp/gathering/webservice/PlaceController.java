@@ -10,9 +10,9 @@ import java.util.List;
 public class PlaceController extends IWS {
 
 	/** createPlace(name, companyId) */
-	@PostMapping("/places")
+	@PostMapping("/places/{companyId}")
 	public Place create(@RequestParam(value = "name") String name,
-	                    @RequestParam(value = "company_id") long companyId) {
+	                    @PathVariable("companyId") long companyId) {
 		initRepos();
 		Place place = new Place();
 		place.setName(name);
@@ -21,15 +21,15 @@ public class PlaceController extends IWS {
 	}
 
 	/** findPlacesByCompany(companyId) */
-	@GetMapping("/places")
-	public List<Place> index(@RequestParam(value = "company_id") long companyId) {
+	@GetMapping("/places/{companyId}")
+	public List<Place> index(@PathVariable("companyId") long companyId) {
 		initRepos();
 		List<Place> places = placeRepo.findPlacesByCompany(companyId);
 		return places != null ? places : new LinkedList<>();
 	}
 
 	/** findPlaceById(placeId, companyId) */
-	@PostMapping("/places/{companyId}/{placeId}")
+	@GetMapping("/places/{companyId}/{placeId}")
 	public Place show(@PathVariable("placeId") long placeId, @PathVariable("companyId") long companyId) {
 		initRepos();
 		Place place = placeRepo.findPlaceById(placeId);

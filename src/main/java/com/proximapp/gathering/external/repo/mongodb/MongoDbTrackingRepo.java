@@ -27,11 +27,11 @@ public class MongoDbTrackingRepo implements ITrackingRepo {
 		tracking.setId(maxId);
 		BasicDBObject obj = new BasicDBObject()
 				.append("_id", tracking.getId())
-				.append("firstname", tracking.getNome())
-				.append("lastname", tracking.getCognome())
-				.append("address", tracking.getIndirizzo())
-				.append("health_insurance_card", tracking.getTesseraSanitaria())
-				.append("phone", tracking.getTelefono())
+				.append("firstname", tracking.getFirstname())
+				.append("lastname", tracking.getLastname())
+				.append("address", tracking.getAddress())
+				.append("health_insurance_card", tracking.getHicard())
+				.append("phone", tracking.getPhone())
 				.append("user_id", tracking.getUserId())
 				.append("company_id", tracking.getCompanyId());
 		trackingCollection.insert(obj);
@@ -47,11 +47,11 @@ public class MongoDbTrackingRepo implements ITrackingRepo {
 			DBObject placeObj = cursor.next();
 			tracking = new Tracking();
 			tracking.setId((long) placeObj.get("_id"));
-			tracking.setNome((String) placeObj.get("firstname"));
-			tracking.setCognome((String) placeObj.get("lastname"));
-			tracking.setIndirizzo((String) placeObj.get("address"));
-			tracking.setTesseraSanitaria((String) placeObj.get("health_insurance_card"));
-			tracking.setTelefono((String) placeObj.get("phone"));
+			tracking.setFirstname((String) placeObj.get("firstname"));
+			tracking.setLastname((String) placeObj.get("lastname"));
+			tracking.setAddress((String) placeObj.get("address"));
+			tracking.setHicard((String) placeObj.get("health_insurance_card"));
+			tracking.setPhone((String) placeObj.get("phone"));
 			tracking.setUserId((long) placeObj.get("user_id"));
 			tracking.setCompanyId((long) placeObj.get("company_id"));
 		}
@@ -66,11 +66,11 @@ public class MongoDbTrackingRepo implements ITrackingRepo {
 		for (DBObject dbObject : cursor) {
 			Tracking tracking = new Tracking();
 			tracking.setId((long) dbObject.get("_id"));
-			tracking.setNome((String) dbObject.get("firstname"));
-			tracking.setCognome((String) dbObject.get("lastname"));
-			tracking.setIndirizzo((String) dbObject.get("address"));
-			tracking.setTesseraSanitaria((String) dbObject.get("health_insurance_card"));
-			tracking.setTelefono((String) dbObject.get("phone"));
+			tracking.setFirstname((String) dbObject.get("firstname"));
+			tracking.setLastname((String) dbObject.get("lastname"));
+			tracking.setAddress((String) dbObject.get("address"));
+			tracking.setHicard((String) dbObject.get("health_insurance_card"));
+			tracking.setPhone((String) dbObject.get("phone"));
 			tracking.setUserId((long) dbObject.get("user_id"));
 			tracking.setCompanyId((long) dbObject.get("company_id"));
 			trackings.add(tracking);
